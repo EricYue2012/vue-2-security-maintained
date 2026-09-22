@@ -96,6 +96,46 @@ describe('parser', () => {
     expect(chars.join('')).toContain(text)
   })
 
+  it('preserves plaintext closing-tag semantics and source offsets', () => {
+    for (const tag of ['script', 'style', 'textarea']) {
+      for (const text of [
+        'hello',
+        'İ hello',
+        '<!--raw-->',
+        '<![CDATA[raw]]>'
+      ]) {
+        // The historical parser accepts suffixes after the closing tag name.
+        for (const suffix of ['', ' ignored', 'suffix', '</' + tag]) {
+          const closing = `</${tag.toUpperCase()}${suffix}>`
+          const source = `<${tag}>${text}${closing}<div>x</div>`
+          const events: any[] = []
+          parseHTML(source, {
+            chars: value => events.push(['text', value]),
+            end: (name, start, end) => events.push(['end', name, start, end])
+          })
+          expect(events[0]).toEqual(['text', text])
+          const start = tag.length + 2 + text.length
+          expect(events[1]).toEqual(['end', tag, start, start + closing.length])
+          expect(events[2]).toEqual(['text', 'x'])
+        }
+      }
+    }
+  })
+
+  it('preserves malformed plaintext and textarea newline handling', () => {
+    for (const tag of ['script', 'style', 'textarea']) {
+      const text = `abc</${tag} </${tag}`
+      const chars: string[] = []
+      parseHTML(`<${tag}>${text}`, { chars: value => chars.push(value) })
+      expect(chars.join('')).toBe(text)
+    }
+    const chars: string[] = []
+    parseHTML('<textarea>\nhello</textarea>', {
+      chars: value => chars.push(value)
+    })
+    expect(chars.join('')).toBe('hello')
+  })
+
   it('not contain root element', () => {
     parse('hello world', baseOptions)
     expect(

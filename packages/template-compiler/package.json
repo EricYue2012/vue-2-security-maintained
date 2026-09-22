@@ -1,6 +1,6 @@
 {
-  "name": "vue-template-compiler",
-  "version": "2.7.16",
+  "name": "@ericyue/vue-template-compiler-security-maintained",
+  "version": "2.7.17",
   "description": "template compiler for Vue 2.0",
   "main": "index.js",
   "unpkg": "browser.js",
@@ -13,7 +13,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vuejs/vue.git"
+    "url": "git+https://github.com/EricYue2012/vue-2-security-maintained.git"
   },
   "keywords": [
     "vue",
@@ -22,7 +22,7 @@
   "author": "Evan You",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vuejs/vue/issues"
+    "url": "https://github.com/EricYue2012/vue-2-security-maintained/issues"
   },
   "homepage": "https://github.com/vuejs/vue/tree/dev/packages/vue-template-compiler#readme",
   "dependencies": {

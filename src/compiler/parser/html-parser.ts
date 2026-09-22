@@ -167,14 +167,21 @@ export function parseHTML(html, options: HTMLParserOptions) {
     } else {
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
+      // Find the fixed closing prefix once, then scan for its terminator once.
+      // Combining these with a lazy wildcard and [^>]* can rescan the tail
+      // for every incomplete closing prefix (quadratic on malformed input).
+      // Keep the original case-insensitive and permissive suffix semantics.
       const reStackedTag =
         reCache[stackedTag] ||
-        (reCache[stackedTag] = new RegExp(
-          '^([\\s\\S]*?)(</' + stackedTag + '[^>]*>)',
-          'i'
-        ))
-      const rest = html.replace(reStackedTag, function (all, text, endTag) {
-        endTagLength = endTag.length
+        (reCache[stackedTag] = new RegExp('</' + stackedTag, 'i'))
+      const match = reStackedTag.exec(html)
+      const close = match
+        ? html.indexOf('>', match.index + match[0].length)
+        : -1
+      let rest = html
+      if (match && close !== -1) {
+        let text = html.slice(0, match.index)
+        endTagLength = close + 1 - match.index
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
             .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
@@ -186,8 +193,8 @@ export function parseHTML(html, options: HTMLParserOptions) {
         if (options.chars) {
           options.chars(text)
         }
-        return ''
-      })
+        rest = html.slice(close + 1)
+      }
       index += html.length - rest.length
       html = rest
       parseEndTag(stackedTag, index - endTagLength, index)

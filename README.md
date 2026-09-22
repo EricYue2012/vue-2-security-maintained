@@ -1,3 +1,10 @@
+# Eric Yue's Vue 2 security fork
+
+This is an independent fork based on Vue 2.7.16. The scoped 2.7.17 packages
+address the reviewed plaintext parser ReDoS cases; they are not official Vue
+releases. See [patch scope, validation and consumer setup](SECURITY-PATCH.md).
+The upstream README follows below.
+
 <p align="center"><a href="https://vuejs.org" target="_blank" rel="noopener noreferrer"><img width="100" src="https://vuejs.org/images/logo.png" alt="Vue logo"></a></p>
 
 <p align="center">
