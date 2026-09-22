@@ -170,7 +170,7 @@ export function parseHTML(html, options: HTMLParserOptions) {
       const reStackedTag =
         reCache[stackedTag] ||
         (reCache[stackedTag] = new RegExp(
-          '([\\s\\S]*?)(</' + stackedTag + '[^>]*>)',
+          '^([\\s\\S]*?)(</' + stackedTag + '[^>]*>)',
           'i'
         ))
       const rest = html.replace(reStackedTag, function (all, text, endTag) {

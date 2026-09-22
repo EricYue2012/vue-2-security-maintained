@@ -1,4 +1,5 @@
 import { parse } from 'compiler/parser/index'
+import { parseHTML } from 'compiler/parser/html-parser'
 import { extend } from 'shared/util'
 import { baseOptions } from 'web/compiler/options'
 import { isIE, isEdge } from 'core/util/env'
@@ -80,6 +81,19 @@ describe('parser', () => {
     expect(
       'Templates should only be responsible for mapping the state'
     ).toHaveBeenWarned()
+  })
+
+  it('handles bounded malformed plaintext elements without pathological scanning', () => {
+    const text = '<'.repeat(10000)
+    const chars: string[] = []
+
+    expect(() => {
+      parseHTML(`<script>${text}</textarea>`, {
+        expectHTML: true,
+        chars: value => chars.push(value)
+      })
+    }).not.toThrow()
+    expect(chars.join('')).toContain(text)
   })
 
   it('not contain root element', () => {
