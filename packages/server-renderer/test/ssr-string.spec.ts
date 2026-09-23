@@ -3,6 +3,7 @@
 import Vue from 'vue'
 import VM from 'vm'
 import { createRenderer } from 'server/index'
+import { ssrCompile } from 'server/compiler'
 import { _it } from './utils'
 
 const { renderToString } = createRenderer()
@@ -66,6 +67,27 @@ describe('SSR: renderToString', () => {
         done()
       }
     )
+  })
+
+  it('ignores inherited static class and style metadata in SSR compiler output', () => {
+    const objectPrototype = Object.prototype as any
+    Object.defineProperty(objectPrototype, 'staticClass', {
+      configurable: true,
+      value: 'inherited-class'
+    })
+    Object.defineProperty(objectPrototype, 'staticStyle', {
+      configurable: true,
+      value: 'inherited-style'
+    })
+
+    try {
+      const result = ssrCompile('<div>Content</div>')
+      expect(result.render).not.toContain('inherited-class')
+      expect(result.render).not.toContain('inherited-style')
+    } finally {
+      delete objectPrototype.staticClass
+      delete objectPrototype.staticStyle
+    }
   })
 
   _it('dynamic class', done => {

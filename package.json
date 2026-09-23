@@ -1,6 +1,6 @@
 {
   "name": "@ericyue/vue-2-security-maintained",
-  "version": "2.7.17",
+  "version": "2.7.18",
   "packageManager": "pnpm@8.9.2",
   "description": "Reactive, component-oriented view layer for modern web interfaces.",
   "main": "dist/vue.runtime.common.js",

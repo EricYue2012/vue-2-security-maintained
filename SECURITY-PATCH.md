@@ -1,6 +1,6 @@
 # Internal Vue 2 parser patch
 
-This fork's scoped release candidate is `@ericyue/vue-2-security-maintained@2.7.17`,
+This fork's scoped release candidate is `@ericyue/vue-2-security-maintained@2.7.18`,
 based on official Vue 2.7.16. It is not an official Vue release or a general
 security-support commitment. Scope is CVE-2024-9506 and the related malformed
 plaintext closing-tag processing found during review.
@@ -14,7 +14,7 @@ package no longer fetches the unpatched official SFC compiler.
 
 Use the matching companion package for consumers that still load the legacy
 template compiler. Its exact runtime version check remains enabled. Stable
-version 2.7.17 satisfies ordinary Vue 2 peer ranges, unlike the previous prerelease
+version 2.7.18 satisfies ordinary Vue 2 peer ranges, unlike the previous prerelease
 version, and should not require `legacy-peer-deps`.
 
 ## Validation and release preparation
@@ -50,10 +50,10 @@ After reviewing and publishing both scoped packages, consumer manifests should p
 ```json
 {
   "dependencies": {
-    "vue": "npm:@ericyue/vue-2-security-maintained@2.7.17"
+    "vue": "npm:@ericyue/vue-2-security-maintained@2.7.18"
   },
   "devDependencies": {
-    "vue-template-compiler": "npm:@ericyue/vue-template-compiler-security-maintained@2.7.17"
+    "vue-template-compiler": "npm:@ericyue/vue-template-compiler-security-maintained@2.7.18"
   }
 }
 ```

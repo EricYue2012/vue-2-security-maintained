@@ -109,6 +109,21 @@ describe('parser', () => {
     expect(chars.join('')).toContain(malformed)
   })
 
+  it('preserves ordinary end-tag suffix semantics', () => {
+    const events: any[] = []
+    parseHTML('<div>hello</div ignored><p>x</p>', {
+      chars: value => events.push(['text', value]),
+      end: (name, start, end) => events.push(['end', name, start, end])
+    })
+
+    expect(events).toEqual([
+      ['text', 'hello'],
+      ['end', 'div', 10, 24],
+      ['text', 'x'],
+      ['end', 'p', 28, 32]
+    ])
+  })
+
   it('preserves plaintext closing-tag semantics and source offsets', () => {
     for (const tag of ['script', 'style', 'textarea']) {
       for (const text of [
