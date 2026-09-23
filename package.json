@@ -14,7 +14,7 @@
     "dist/*.mjs",
     "types/*.d.ts",
     "compiler-sfc",
-    "packages/compiler-sfc",
+    "packages/compiler-sfc/dist",
     "SECURITY-PATCH.md"
   ],
   "exports": {
