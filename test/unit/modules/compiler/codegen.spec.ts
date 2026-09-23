@@ -267,6 +267,30 @@ describe('codegen', () => {
     )
   })
 
+  it('ignores inherited static class and style metadata', () => {
+    const objectPrototype = Object.prototype as any
+    Object.defineProperty(objectPrototype, 'staticClass', {
+      configurable: true,
+      value: '"inherited-class"'
+    })
+    Object.defineProperty(objectPrototype, 'staticStyle', {
+      configurable: true,
+      value: '{"color":"red"}'
+    })
+
+    try {
+      const ast = parse('<div>Content</div>', baseOptions)
+      optimize(ast, baseOptions)
+      const res = generate(ast, baseOptions)
+
+      expect(res.render).not.toContain('staticClass:"inherited-class"')
+      expect(res.render).not.toContain('staticStyle:{"color":"red"}')
+    } finally {
+      delete objectPrototype.staticClass
+      delete objectPrototype.staticStyle
+    }
+  })
+
   it('generate style binding', () => {
     assertCodegen(
       '<p :style="error">hello world</p>',
