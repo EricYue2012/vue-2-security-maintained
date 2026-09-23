@@ -1,1 +1,1 @@
-export * from '@vue/compiler-sfc'
+export * from '../packages/compiler-sfc/dist/compiler-sfc'

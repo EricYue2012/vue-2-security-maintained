@@ -1,0 +1,36 @@
+name: Security package regression
+on:
+  push:
+    branches: [main, security/cve-2024-9506]
+  pull_request:
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
+      - run: pnpm run ts-check
+      - run: pnpm run test:unit
+      - run: pnpm run test:sfc
+      - run: pnpm run build
+      - run: pnpm run build:types
+      - run: pnpm run test:security
+      - name: Test packed consumer without peer overrides
+        shell: bash
+        run: |
+          stage=$(mktemp -d)
+          mkdir "$stage/artifacts" "$stage/consumer"
+          pnpm pack --pack-destination "$stage/artifacts"
+          pnpm --dir packages/template-compiler pack --pack-destination "$stage/artifacts"
+          export SECURITY_STAGE="$stage"
+          node -e 'const fs=require("fs"); const path=require("path"); const stage=process.env.SECURITY_STAGE; const deps={vue:"file:"+path.join(stage,"artifacts/ericyue-vue-2-security-maintained-2.7.17.tgz"),"vue-template-compiler":"file:"+path.join(stage,"artifacts/ericyue-vue-template-compiler-security-maintained-2.7.17.tgz"),"vue-axios":"3.2.4",vuex:"3.6.2"}; fs.writeFileSync(path.join(stage,"consumer/package.json"),JSON.stringify({name:"security-consumer",version:"1.0.0",private:true,dependencies:deps}));'
+          npm install --prefix "$stage/consumer" --ignore-scripts --no-audit --no-fund
+          npm ci --prefix "$stage/consumer" --ignore-scripts --no-audit --no-fund
+          node scripts/test-security.cjs "$stage/consumer/node_modules/vue" "$stage/consumer/node_modules/vue-template-compiler"

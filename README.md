@@ -1,3 +1,9 @@
+## Eric Yue's Vue 2 security fork
+
+This is an independent fork based on Vue 2.7.16. The scoped 2.7.18 packages
+contain security hardening for the reviewed parser and compiler issues; they are
+not official Vue releases. See [patch scope, validation and consumer setup](SECURITY-PATCH.md).
+
 ## Vue 2 has reached End of Life
 
 **You are looking at the now inactive repository for Vue 2. The actively maintained repository for the latest version of Vue is [vuejs/core](https://github.com/vuejs/core).**

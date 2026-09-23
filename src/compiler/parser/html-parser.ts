@@ -23,7 +23,11 @@ const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
 const startTagClose = /^\s*(\/?)>/
-const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+// Do not let a malformed end tag scan past another markup opener. The
+// ordinary-text parser tests this expression repeatedly while looking for
+// the next tag, so allowing `[^>]*` to consume the entire remainder makes
+// repeated incomplete end tags quadratic.
+const endTag = new RegExp(`^<\\/${qnameCapture}[^<]*>`)
 const doctype = /^<!DOCTYPE [^>]+>/i
 // #7298: escape - to avoid being passed as HTML comment when inlined in page
 const comment = /^<!\--/
@@ -167,14 +171,21 @@ export function parseHTML(html, options: HTMLParserOptions) {
     } else {
       let endTagLength = 0
       const stackedTag = lastTag.toLowerCase()
+      // Find the fixed closing prefix once, then scan for its terminator once.
+      // Combining these with a lazy wildcard and [^>]* can rescan the tail
+      // for every incomplete closing prefix (quadratic on malformed input).
+      // Keep the original case-insensitive and permissive suffix semantics.
       const reStackedTag =
         reCache[stackedTag] ||
-        (reCache[stackedTag] = new RegExp(
-          '([\\s\\S]*?)(</' + stackedTag + '[^>]*>)',
-          'i'
-        ))
-      const rest = html.replace(reStackedTag, function (all, text, endTag) {
-        endTagLength = endTag.length
+        (reCache[stackedTag] = new RegExp('</' + stackedTag, 'i'))
+      const match = reStackedTag.exec(html)
+      const close = match
+        ? html.indexOf('>', match.index + match[0].length)
+        : -1
+      let rest = html
+      if (match && close !== -1) {
+        let text = html.slice(0, match.index)
+        endTagLength = close + 1 - match.index
         if (!isPlainTextElement(stackedTag) && stackedTag !== 'noscript') {
           text = text
             .replace(/<!\--([\s\S]*?)-->/g, '$1') // #7298
@@ -186,8 +197,8 @@ export function parseHTML(html, options: HTMLParserOptions) {
         if (options.chars) {
           options.chars(text)
         }
-        return ''
-      })
+        rest = html.slice(close + 1)
+      }
       index += html.length - rest.length
       html = rest
       parseEndTag(stackedTag, index - endTagLength, index)

@@ -90,6 +90,7 @@ function getSize (code) {
 
 function logError (e) {
   console.log(e)
+  process.exitCode = 1
 }
 
 function blue (str) {
