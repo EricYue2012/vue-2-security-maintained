@@ -23,7 +23,11 @@ const ncname = `[a-zA-Z_][\\-\\.0-9_a-zA-Z${unicodeRegExp.source}]*`
 const qnameCapture = `((?:${ncname}\\:)?${ncname})`
 const startTagOpen = new RegExp(`^<${qnameCapture}`)
 const startTagClose = /^\s*(\/?)>/
-const endTag = new RegExp(`^<\\/${qnameCapture}[^>]*>`)
+// Do not let a malformed end tag scan past another markup opener. The
+// ordinary-text parser tests this expression repeatedly while looking for
+// the next tag, so allowing `[^>]*` to consume the entire remainder makes
+// repeated incomplete end tags quadratic.
+const endTag = new RegExp(`^<\\/${qnameCapture}[^<]*>`)
 const doctype = /^<!DOCTYPE [^>]+>/i
 // #7298: escape - to avoid being passed as HTML comment when inlined in page
 const comment = /^<!\--/

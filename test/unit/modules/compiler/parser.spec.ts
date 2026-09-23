@@ -96,6 +96,19 @@ describe('parser', () => {
     expect(chars.join('')).toContain(text)
   })
 
+  it('handles repeated incomplete ordinary end tags without pathological scanning', () => {
+    const malformed = '</div '.repeat(10000)
+    const chars: string[] = []
+
+    expect(() => {
+      parseHTML(`<section>${malformed}`, {
+        expectHTML: true,
+        chars: value => chars.push(value)
+      })
+    }).not.toThrow()
+    expect(chars.join('')).toContain(malformed)
+  })
+
   it('preserves plaintext closing-tag semantics and source offsets', () => {
     for (const tag of ['script', 'style', 'textarea']) {
       for (const text of [
