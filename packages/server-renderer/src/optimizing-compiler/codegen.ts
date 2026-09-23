@@ -22,6 +22,7 @@ import {
 
 import { escape } from '../util'
 import { optimizability } from './optimizer'
+import { hasOwn } from 'shared/util'
 import type { CodegenResult } from 'compiler/codegen/index'
 import { ASTElement, ASTNode, CompilerOptions } from 'types/compiler'
 
@@ -169,14 +170,18 @@ function elementToOpenTagSegments(el, state): Array<StringSegment> {
     segments.push({ type: EXPRESSION, value: `_ssrDOMProps(${binding})` })
   }
   // class
-  if (el.staticClass || el.classBinding) {
+  if ((hasOwn(el, 'staticClass') && el.staticClass) || el.classBinding) {
     segments.push.apply(
       segments,
       genClassSegments(el.staticClass, el.classBinding)
     )
   }
   // style & v-show
-  if (el.staticStyle || el.styleBinding || el.attrsMap['v-show']) {
+  if (
+    (hasOwn(el, 'staticStyle') && el.staticStyle) ||
+    el.styleBinding ||
+    el.attrsMap['v-show']
+  ) {
     segments.push.apply(
       segments,
       genStyleSegments(
